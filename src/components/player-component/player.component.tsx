@@ -8,8 +8,7 @@ import { CommonUtility } from '../../common/utils/utilities';
 import React from 'react';
 import { RegisterComponent } from './components/register.component';
 import { Steps } from 'antd';
-import { title } from 'process';
-import { SolutionOutlined } from '@ant-design/icons';
+import { PickComponent } from './components/pick.component';
 
 interface IPlayerProps {
 
@@ -36,8 +35,11 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
 
     const [gameId, setGameId] = useState('');
     const [player, setPlayer] = useState('');
+    const [listPapers, setListPapers] = useState([])
 
     const [currentPage, setCurrentPage] = useState<'join' | 'register' | 'pick' | 'play'>('join');
+
+
 
     return (
         <div className="__app-player-page">
@@ -50,6 +52,11 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
             }
             {
                 currentPage === 'register' ? <RegisterComponent onRegisterCallback={(_player, callback) => {
+                    onRegisterPlayer(_player, callback);
+                }} /> : <></>
+            }
+            {
+                currentPage === 'pick' ? <PickComponent listPapers={listPapers} onPickCallback={(_player, callback) => {
                     onRegisterPlayer(_player, callback);
                 }} /> : <></>
             }
@@ -93,6 +100,11 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
                     toast.error(`Game không tồn tại.`);
                     callback();
                 } else {
+                    playerService.socketService.listenKeySocket(_gameId).subscribe({
+                        next: res => {
+                            console.log(res);
+                        }
+                    })
                     setCurrentPage('register');
                 }
             }

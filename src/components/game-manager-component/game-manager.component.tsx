@@ -110,6 +110,13 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
                 } else {
                     setGameId(res);
                     setCurrentPage('waiting');
+                    managerService.socketService.listenKeySocket(res).subscribe({
+                        next: res => {
+                            if (res) {
+                                setPlayers(res.players ?? players);
+                            }
+                        }
+                    })
                 }
             }
         })

@@ -1,9 +1,16 @@
 import { Observable } from "rxjs";
 import { CoreServices } from "../../common/services/service.core";
 import axios from "axios";
+import { SocketService } from "../../common/services/socket-io.service";
 
 
 export class GameManagerServices extends CoreServices {
+
+    socketService: SocketService;
+    constructor() {
+        super();
+        this.socketService = new SocketService();
+    }
     
     createNewGameBoard$() {
         return new Observable(observer => {
