@@ -186,6 +186,45 @@
                 }
             }
 
+            .__app-paper-select {
+                display: flex;
+                width: calc(100% - 300px);
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 32px;
+                justify-content: center;
+
+                .__app-paper-item {
+                    width: 125px;
+                    display: flex;
+
+                    &:hover {
+                        transform: scale(1.05);
+                        cursor: pointer;
+                    }
+
+                    img {
+                        width: 120px;
+                    }
+
+                    &.disable {
+                        cursor: not-allowed;
+
+                        img {
+                            opacity: 0.3;
+                        }
+                    }
+
+                    .__icon-check {
+                        position: absolute;
+                        padding: 8px;
+                        background: rgb(95 42 83);
+                        border-radius: 50%;
+                        color: rgb(255 255 255);
+                    }
+                }
+            }
+
             .__app-players-waiting {
                 display: flex;
                 min-height: calc(100vh - 200px);

@@ -42,4 +42,20 @@ export class PlayerServices extends CoreServices {
             })
         })
     }
+
+    pickPapers$(gameId: string, player: string, paperIds: string[]) {
+        return new Observable(observer => {
+            const url = `${this.globalSettings.backendUrl}/api/v1/player/pickPaper`;
+            const datapost = { playerName: player, gameId: gameId, paperIds: paperIds };
+            axios.post(url, datapost).then((res) => {
+                observer.next(res.data.value);
+                observer.complete();
+            }).catch((error) => {
+                observer.next({
+                    error: error
+                });
+                observer.complete();
+            })
+        })
+    }
 }

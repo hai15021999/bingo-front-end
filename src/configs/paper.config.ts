@@ -1,0 +1,1 @@
+export const PaperIds = ['blue1', 'blue2', 'green1', 'green2', 'lime1', 'lime2', 'orange1', 'orange2', 'pink1', 'pink2', 'purple1', 'purple2', 'red1', 'red2', 'yellow1', 'yellow2']
