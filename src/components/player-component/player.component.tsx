@@ -15,6 +15,13 @@ interface IPlayerProps {
 
 }
 
+/**
+    * @description state for current activity of player
+    * - join is input game id step
+    * - register is input player name step
+    * - pick is choose loto paper step
+    * - play is playing time
+*/
 enum StepperStateEnum {
     'join',
     'register',
@@ -29,11 +36,9 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
 
     const [gameId, setGameId] = useState('');
     const [player, setPlayer] = useState('');
-    /**
-     * @description state for current activity of player
-     */
+
     const [currentPage, setCurrentPage] = useState<'join' | 'register' | 'pick' | 'play'>('join');
-    
+
     return (
         <div className="__app-player-page">
             <div className="__app-background-shape-left"></div>
@@ -50,7 +55,7 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
             }
 
             <div className="__app-stepper-block">
-                <Steps 
+                <Steps
                     current={StepperStateEnum[currentPage]}
                     status='process'
                     items={[
