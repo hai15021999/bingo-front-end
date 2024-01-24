@@ -9,7 +9,10 @@ interface IPlayingPageProps {
     nextNumber: number;
     preNumber: number;
     listNumber: number[];
-    isShowPopupWinner: boolean;
+    isShowPopupWinner: {
+        isShow: boolean;
+        winner: string[];
+    };
     onWaitingBingo: () => void;
     onBingo: (row: number[], paperId: string) => void;
     onClosePopup: () => void;
@@ -77,13 +80,16 @@ export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
                     closable={false}
                     title={(
                         <span className='__app-dialog-title'>
-                            Tạo Hợp Đồng
+                            CHÚC MỪNG NGƯỜI CHƠI!
                         </span>
                     )}
                     footer={getRenderFooterButton()}
                     centered
                 >
-
+                    <div className="__dialog-content" style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span><strong>{ props.isShowPopupWinner.winner.join(', ') }</strong> đã kinh.</span>
+                        <span>Đóng thông báo và báo kinh trùng nếu bạn cũng kinh.</span>
+                    </div>
                 </Modal> : <></>
             }
         </div>

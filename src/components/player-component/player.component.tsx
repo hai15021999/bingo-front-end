@@ -79,7 +79,10 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
                 nextNumber={currentNumber} 
                 paperIds={selectedPapers} 
                 players={listPlayers} 
-                isShowPopupWinner={isShowPopupWinner}
+                isShowPopupWinner={{
+                    isShow: isShowPopupWinner,
+                    winner: winner
+                }}
                 onWaitingBingo={() => {
                     notifyWaitingBingo();
                 }}
@@ -206,8 +209,10 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
 
     function verifyBingo(row: number[], paperId: string) {
         playerService.notifyBingo$(gameId, player, paperId, row).pipe(take(1)).subscribe({
-            next: (res) => {
-
+            next: (res: any) => {
+                if (res.error) {
+                    toast.error(`Kinh hụt`);
+                }
             }
         });
     }
