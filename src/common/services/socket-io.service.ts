@@ -9,7 +9,8 @@ export class SocketService {
         const socketUrl = environment.domain;
         this._socket = io(socketUrl, {
           transports: ['websocket'],
-          autoConnect: false
+          autoConnect: false,
+          withCredentials: true,
         });
         this._socket.connect();
     }

@@ -8,6 +8,7 @@ import { Steps } from 'antd';
 import { GameManagerServices } from './game-manager.service';
 import { take } from 'rxjs';
 import { WaitingComponent } from './components/waiting.component';
+import { PlayingPageComponent } from './components/playing.component';
 
 
 interface IGameManagerProps {
@@ -33,6 +34,8 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
      * @description state for current activity of game manager
      */
     const [currentPage, setCurrentPage] = useState<'login' | 'creating' | 'waiting' | 'playing' | 'recording'>('login');
+    const [listNumber, setListNumber] = useState<number[]>([]);
+    const [currentNumber, setCurrentNumber] = useState(-1);
 
     useEffect(() => {
         if (!isInit) {
@@ -60,7 +63,12 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
             }
             {
                 currentPage === 'waiting' ? <WaitingComponent gameId={gameId} players={players} onStartGameCallback={(callback) => {
-                    onCreateGame(callback);
+                    onStartGame(callback);
+                }} /> : <></>
+            }
+            {
+                currentPage === 'playing' ? <PlayingPageComponent players={players} listNumber={listNumber} nextNumber={currentNumber} onGenerateNumber={(callback) => {
+                    onGenerateNextNumber(callback);
                 }} /> : <></>
             }
             <div className="__app-stepper-block">
@@ -102,6 +110,8 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
     }
 
     function onCreateGame(callback: any) {
+        setGameId('');
+        setPlayers([]);
         managerService.createNewGameBoard$().pipe(take(1)).subscribe({
             next: (res: any) => {
                 if (res.error) {
@@ -114,9 +124,40 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
                         next: res => {
                             if (res) {
                                 setPlayers(res.players ?? players);
+                                setListNumber(res.result);
+                                setCurrentNumber([...res.result].reverse()[0]);
                             }
                         }
                     })
+                }
+            }
+        })
+    }
+
+    function onStartGame(callback: any) {
+        managerService.startGameBoard$(gameId).pipe(take(1)).subscribe({
+            next: (res: any) => {
+                if (res.error) {
+                    toast.error(res.error);
+                    callback();
+                } else {
+                    setCurrentPage('playing');
+                }
+            }
+        })
+    }
+
+    function onGenerateNextNumber(callback: any) {
+        managerService.getNextNumber$(gameId).pipe(take(1)).subscribe({
+            next: (res: any) => {
+                if (res.error) {
+                    toast.error(res.error);
+                    callback();
+                } else {
+                    // const temp = [...listNumber];
+                    // temp.push(res);
+                    // setListNumber(temp);
+                    // setCurrentNumber(res);
                 }
             }
         })

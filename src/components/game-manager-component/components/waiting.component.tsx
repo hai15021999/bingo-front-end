@@ -27,6 +27,9 @@ export const WaitingComponent: React.FC<IWaitingProps> = (props) => {
                         onClick={(e) => {
                             e.preventDefault();
                             setProcessing(true);
+                            props.onStartGameCallback(() => {
+                                setProcessing(false);
+                            })
                         }}
                     >
                         Bắt đầu
@@ -38,7 +41,7 @@ export const WaitingComponent: React.FC<IWaitingProps> = (props) => {
                 <div className="__app-list-players">
                     {
                         props.players.reduce((acc: any[], cur) => {
-                            acc.push(<div className="__app-player-name">{cur}</div>)
+                            acc.push(<div className="__app-player-name" key={`player_${cur}`}>{cur}</div>)
                             return acc;
                         }, [])
                     }

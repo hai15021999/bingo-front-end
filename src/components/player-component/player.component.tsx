@@ -10,6 +10,7 @@ import { RegisterComponent } from './components/register.component';
 import { Steps } from 'antd';
 import { PickComponent } from './components/pick.component';
 import { WaitingComponent } from './components/waiting.component';
+import { PlayingPageComponent } from './components/playing-page.component';
 
 interface IPlayerProps {
 
@@ -39,7 +40,10 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
     const [selectedPapers, setSelectedPapers] = useState<string[]>([])
     const [paperDisable, setPaperDisable] = useState([]);
     const [gameStatus, setGameStatus] = useState('new');
-    const [listPlayers, setListPlayers] = useState<string[]>([])
+    const [listPlayers, setListPlayers] = useState<string[]>([]);
+    const [currentNumber, setCurrentNumber] = useState(-1);
+    const [previousNumber, setPreviousNumber] = useState(-1);
+    const [listNumber, setListNumber] = useState<number[]>([13, 15, 17, 31, 44, 61, 70]);
 
     const [currentPage, setCurrentPage] = useState<'join' | 'register' | 'pick' | 'play'>('join');
 
@@ -67,7 +71,21 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
             {
                 currentPage === 'play' ? gameStatus === 'new' ? <WaitingComponent gameId={gameId} players={listPlayers} /> : <></> : <></>
             }
-
+            {
+                currentPage === 'play' ? gameStatus === 'playing' ? <PlayingPageComponent 
+                preNumber={previousNumber} 
+                listNumber={listNumber} 
+                nextNumber={currentNumber} 
+                paperIds={selectedPapers} 
+                players={listPlayers} 
+                onWaitingBingo={() => {
+                    notifyWaitingBingo();
+                }}
+                onBingo={(row, paperId) => {
+                    verifyBingo(row, paperId);
+                }}
+                /> : <></> : <></>
+            }
             <div className='__app-stepper-block'>
                 <Steps
                     current={StepperStateEnum[currentPage]}
@@ -110,8 +128,17 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
                     playerService.socketService.listenKeySocket(_gameId).subscribe({
                         next: res => {
                             setPaperDisable(res.selectedPapers);
-                            setGameStatus(res.status);
                             setListPlayers(res.players);
+                            if (gameStatus === 'new' && res.status === 'playing') {
+                                setGameStatus(res.status);
+                            }
+                            setListNumber(res.result);
+                            setPreviousNumber([...res.result].reverse()[1] ?? -1);
+                            setCurrentNumber([...res.result].reverse()[0] ?? -1);
+                            if (res['waitingPlayer']) {
+                                toast.loading(`${res['waitingPlayer']} đợi...`);
+                            }
+
                         }
                     })
                     setCurrentPage('register');
@@ -162,5 +189,17 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
                 }
             }
         })
+    }
+
+    function notifyWaitingBingo() {
+        playerService.notifyWaitingBingo$(gameId, player).pipe(take(1)).subscribe();
+    }
+
+    function verifyBingo(row: number[], paperId: string) {
+        playerService.notifyBingo$(gameId, player, paperId, row).pipe(take(1)).subscribe({
+            next: (res) => {
+
+            }
+        });
     }
 }

@@ -20,7 +20,7 @@ export class PlayerServices extends CoreServices {
                 observer.complete();
             }).catch((error) => {
                 observer.next({
-                    error: error
+                    error: error.message ?? JSON.stringify(error)
                 });
                 observer.complete();
             })
@@ -36,7 +36,7 @@ export class PlayerServices extends CoreServices {
                 observer.complete();
             }).catch((error) => {
                 observer.next({
-                    error: error
+                    error: error.message ?? JSON.stringify(error)
                 });
                 observer.complete();
             })
@@ -52,7 +52,39 @@ export class PlayerServices extends CoreServices {
                 observer.complete();
             }).catch((error) => {
                 observer.next({
-                    error: error
+                    error: error.message ?? JSON.stringify(error)
+                });
+                observer.complete();
+            })
+        })
+    }
+
+    notifyWaitingBingo$(gameId: string, player: string) {
+        return new Observable(observer => {
+            const url = `${this.globalSettings.backendUrl}/api/v1/player/notifyWaiting`;
+            const datapost = { playerName: player, gameId: gameId };
+            axios.post(url, datapost).then((res) => {
+                observer.next(res.data.value);
+                observer.complete();
+            }).catch((error) => {
+                observer.next({
+                    error: error.message ?? JSON.stringify(error)
+                });
+                observer.complete();
+            })
+        })
+    }
+
+    notifyBingo$(gameId: string, player: string, paperId: string, rowBingo: number[]) {
+        return new Observable(observer => {
+            const url = `${this.globalSettings.backendUrl}/api/v1/player/notifyBingo`;
+            const datapost = { playerName: player, gameId: gameId, paperId: paperId, rowBingo: rowBingo };
+            axios.post(url, datapost).then((res) => {
+                observer.next(res.data.value);
+                observer.complete();
+            }).catch((error) => {
+                observer.next({
+                    error: error.message ?? JSON.stringify(error)
                 });
                 observer.complete();
             })

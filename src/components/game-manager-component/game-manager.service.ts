@@ -20,7 +20,41 @@ export class GameManagerServices extends CoreServices {
                 observer.complete();
             }).catch((error) => {
                 observer.next({
-                    error: error
+                    error: error.message ?? JSON.stringify(error)
+                });
+                observer.complete();
+            })
+        })
+    }
+
+    startGameBoard$(gameId: string) {
+        return new Observable(observer => {
+            const url = `${this.globalSettings.backendUrl}/api/v1/game-board/startGame`;
+            axios.post(url, {
+                gameId: gameId
+            }).then((res) => {
+                observer.next(res.data.value);
+                observer.complete();
+            }).catch((error) => {
+                observer.next({
+                    error: error.message ?? JSON.stringify(error)
+                });
+                observer.complete();
+            })
+        })
+    }
+
+    getNextNumber$(gameId: string) {
+        return new Observable(observer => {
+            const url = `${this.globalSettings.backendUrl}/api/v1/game-board/getNumber`;
+            axios.post(url, {
+                gameId: gameId
+            }).then((res) => {
+                observer.next(res.data.value);
+                observer.complete();
+            }).catch((error) => {
+                observer.next({
+                    error: error.message ?? JSON.stringify(error)
                 });
                 observer.complete();
             })
