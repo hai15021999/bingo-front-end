@@ -367,6 +367,12 @@
                     .__app-submit-btn {
                         display: flex;
                         justify-content: center;
+
+                        .__app-container-button {
+                            padding: 6px;
+                            background-color: rgb(255, 255, 255);
+                            border-radius: 8px;
+                        }
                     }
                 }
             }

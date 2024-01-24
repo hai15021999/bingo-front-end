@@ -47,7 +47,8 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
 
     const [currentPage, setCurrentPage] = useState<'join' | 'register' | 'pick' | 'play'>('join');
 
-
+    const [winner, setWinner] = useState<any>(null);
+    const [isShowPopupWinner, setShowPopupWinner] = useState(false);
 
     return (
         <div className='__app-player-page'>
@@ -78,11 +79,15 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
                 nextNumber={currentNumber} 
                 paperIds={selectedPapers} 
                 players={listPlayers} 
+                isShowPopupWinner={isShowPopupWinner}
                 onWaitingBingo={() => {
                     notifyWaitingBingo();
                 }}
                 onBingo={(row, paperId) => {
                     verifyBingo(row, paperId);
+                }}
+                onClosePopup={() => {
+                    setShowPopupWinner(false);
                 }}
                 /> : <></> : <></>
             }
@@ -137,6 +142,10 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
                             setCurrentNumber([...res.result].reverse()[0] ?? -1);
                             if (res['waitingPlayer']) {
                                 toast.loading(`${res['waitingPlayer']} đợi...`);
+                            }
+                            if (res['winner'] && res['winner'].length !== winner?.length) {
+                                setWinner(res['winner']);
+                                setShowPopupWinner(true);
                             }
 
                         }

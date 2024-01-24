@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { PaperColor, PaperData } from "../../../configs/paper.config";
-import { Button } from "antd";
+import { Button, Modal } from "antd";
 import toast from "react-hot-toast";
 
 interface IPlayingPageProps {
@@ -9,12 +9,15 @@ interface IPlayingPageProps {
     nextNumber: number;
     preNumber: number;
     listNumber: number[];
+    isShowPopupWinner: boolean;
     onWaitingBingo: () => void;
     onBingo: (row: number[], paperId: string) => void;
+    onClosePopup: () => void;
 }
 
 export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
     const [selectedNumber, setSelectedNumber] = useState<number[]>([]);
+    const [hasWinner, setHasWinner] = useState(false);
 
     return (
         <div className="__app-main playing">
@@ -47,24 +50,42 @@ export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
                         <div className="__app-next-number">{props.nextNumber > 0 ? props.nextNumber : '-'}</div>
                     </div>
                     <div className="__app-submit-btn">
-                        <Button
-                            type='primary'
-                            className='__app-form-button'
-                            onClick={(e) => {
-                                e.preventDefault();
-                                const { rowBingo, paperId  } = getBingoRow();
-                                if (rowBingo && paperId) {
-                                    props.onBingo(rowBingo, paperId);
-                                } else {
-                                    toast.error(`Chọn đủ 1 hàng 5 rồi kinh`);
-                                }
-                            }}
-                        >
-                            BÁO KINH
-                        </Button>
+                        <div className="__app-container-button">
+                            <Button
+                                type='primary'
+                                className='__app-form-button'
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    const { rowBingo, paperId } = getBingoRow();
+                                    if (rowBingo && paperId) {
+                                        props.onBingo(rowBingo, paperId);
+                                    } else {
+                                        toast.error(`Chọn đủ 1 hàng 5 rồi kinh`);
+                                    }
+                                }}
+                            >
+                                {hasWinner ? 'BÁO KINH TRÙNG' : 'BÁO KINH'}
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
+            {
+                props.isShowPopupWinner ? <Modal
+                    width={1100}
+                    open={true}
+                    closable={false}
+                    title={(
+                        <span className='__app-dialog-title'>
+                            Tạo Hợp Đồng
+                        </span>
+                    )}
+                    footer={getRenderFooterButton()}
+                    centered
+                >
+
+                </Modal> : <></>
+            }
         </div>
     )
 
@@ -180,6 +201,19 @@ export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
         }, null) : null;
 
         return { rowBingo, paperId };
+    }
+
+    function getRenderFooterButton(): React.ReactNode[] {
+        let nodes: React.ReactNode[] = []
+        nodes.push(
+            <Button key='cancel' onClick={() => {
+                if (props.onClosePopup) {
+                    setHasWinner(true);
+                    props.onClosePopup();
+                }
+            }}>Đóng</Button>
+        );
+        return nodes;
     }
 
 }

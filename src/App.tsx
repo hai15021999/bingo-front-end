@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './App.scss';
 import {
   createBrowserRouter,
   Navigate,
   RouterProvider,
 } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
+import toast, { Toaster, useToasterStore } from 'react-hot-toast';
 import { GameManagerPage } from './components/game-manager-component/game-manager.component';
 import { ErrorPage } from './components/error-pages/error-page';
 import { ConfigProvider } from 'antd';
@@ -13,6 +13,15 @@ import { ComponentThemeConfig } from './configs/component.config';
 import { PlayerPage } from './components/player-component/player.component';
 
 function App() {
+
+  const { toasts } = useToasterStore()
+
+  useEffect(() => {
+    toasts
+      .filter(t => t.visible) // Only consider visible toasts
+      .filter((item, i) => i >= 3) // Is toast index over limit
+      .forEach(t => toast.dismiss(t.id)) // Dismiss – Use toast.remove(t.id) removal without animation
+  }, [toasts])
 
   const rootRouter = createBrowserRouter([
     {
