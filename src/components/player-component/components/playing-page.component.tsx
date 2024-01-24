@@ -74,7 +74,7 @@ export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
                 </div>
             </div>
             {
-                props.isShowPopupWinner ? <Modal
+                props.isShowPopupWinner.isShow ? <Modal
                     width={1100}
                     open={true}
                     closable={false}
@@ -87,7 +87,7 @@ export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
                     centered
                 >
                     <div className="__dialog-content" style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span><strong>{ props.isShowPopupWinner.winner.join(', ') }</strong> đã kinh.</span>
+                        <span><strong>{ props.isShowPopupWinner.winner?.join(', ') ?? '' }</strong> đã kinh.</span>
                         <span>Đóng thông báo và báo kinh trùng nếu bạn cũng kinh.</span>
                     </div>
                 </Modal> : <></>
