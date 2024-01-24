@@ -2,6 +2,7 @@ import React from 'react';
 import './App.scss';
 import {
   createBrowserRouter,
+  Navigate,
   RouterProvider,
 } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
@@ -15,24 +16,25 @@ function App() {
 
   const rootRouter = createBrowserRouter([
     {
-      errorElement: <ErrorPage />,
-      children: [
-        {
-          path: '/game-manager',
-          element: <ConfigProvider theme={ComponentThemeConfig}>
-            <GameManagerPage />
-          </ConfigProvider>,
-          children: []
-        },
-        {
-          path: '/gaming',
-          element: <ConfigProvider theme={ComponentThemeConfig}>
-            <PlayerPage />
-          </ConfigProvider>,
-          children: []
-        },
-      ]
-    }
+      path: '/game-manager',
+      element: <ConfigProvider theme={ComponentThemeConfig}>
+        <GameManagerPage />
+      </ConfigProvider>,
+    },
+    {
+      path: '/gaming',
+      element: <ConfigProvider theme={ComponentThemeConfig}>
+        <PlayerPage />
+      </ConfigProvider>,
+    },
+    {
+      path: '/',
+      element: <Navigate to="/gaming" />
+    },
+    {
+      path: "*",
+      element: <ErrorPage />
+    },
   ]);
 
   return (
