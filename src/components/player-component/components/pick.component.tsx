@@ -1,5 +1,5 @@
-import { CheckOutlined, LoadingOutlined } from '@ant-design/icons';
-import { Button, Form, Input } from 'antd';
+import { CheckOutlined } from '@ant-design/icons';
+import { Button } from 'antd';
 import { useState } from 'react';
 import { PaperIds } from '../../../configs/paper.config';
 

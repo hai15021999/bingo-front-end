@@ -146,7 +146,7 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
                             if (res['waitingPlayer']) {
                                 toast.loading(`${res['waitingPlayer']} đợi...`);
                             }
-                            if (res['winner'] && res['winner'].length !== winner?.length) {
+                            if (res['isBingo'] && res['winner'].length > 0 && res['winner'].length !== winner?.length) {
                                 setWinner(res['winner']);
                                 setShowPopupWinner(true);
                             }
