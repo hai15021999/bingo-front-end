@@ -36,6 +36,7 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
     const [currentPage, setCurrentPage] = useState<'login' | 'creating' | 'waiting' | 'playing' | 'recording'>('login');
     const [listNumber, setListNumber] = useState<number[]>([]);
     const [currentNumber, setCurrentNumber] = useState(-1);
+    const [winner, setWinner] = useState<any>(null);
 
     useEffect(() => {
         if (!isInit) {
@@ -44,6 +45,7 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
                 setGameManager(JSON.parse(manager));
                 setCurrentPage('creating');
             }
+            setInit(true);
         }
     }, [isInit]);
 
@@ -67,7 +69,14 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
                 }} /> : <></>
             }
             {
-                currentPage === 'playing' ? <PlayingPageComponent players={players} listNumber={listNumber} nextNumber={currentNumber} onGenerateNumber={(callback) => {
+                currentPage === 'playing' ? <PlayingPageComponent 
+                players={players} 
+                listNumber={listNumber} 
+                nextNumber={currentNumber} 
+                onEndGameCallback={(callback) => {
+                    onEndGame(callback);
+                }}
+                onGenerateNumber={(callback) => {
                     onGenerateNextNumber(callback);
                 }} /> : <></>
             }
@@ -126,6 +135,9 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
                                 setPlayers(res.players ?? players);
                                 setListNumber(res.result);
                                 setCurrentNumber([...res.result].reverse()[0]);
+                                if (res['isBingo'] && res['winner'].length > 0 && res['winner'].length !== winner?.length) {
+                                    setWinner(res['winner']);
+                                }
                             }
                         }
                     })
@@ -158,6 +170,19 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
                     // temp.push(res);
                     // setListNumber(temp);
                     // setCurrentNumber(res);
+                }
+            }
+        })
+    }
+
+    function onEndGame(callback: any) {
+        managerService.finishGame$(gameId).pipe(take(1)).subscribe({
+            next: (res: any) => {
+                if (res.error) {
+                    toast.error(res.error);
+                    callback();
+                } else {
+                    
                 }
             }
         })

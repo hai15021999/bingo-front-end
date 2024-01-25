@@ -16,6 +16,7 @@ interface IPlayingPageProps {
     onWaitingBingo: () => void;
     onBingo: (row: number[], paperId: string) => void;
     onClosePopup: () => void;
+    isUserBingo: boolean;
 }
 
 export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
@@ -56,6 +57,7 @@ export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
                         <div className="__app-container-button">
                             <Button
                                 type='primary'
+                                disabled={props.isUserBingo}
                                 className='__app-form-button'
                                 onClick={(e) => {
                                     e.preventDefault();
@@ -75,7 +77,7 @@ export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
             </div>
             {
                 props.isShowPopupWinner.isShow ? <Modal
-                    width={1100}
+                    width={300}
                     open={true}
                     closable={false}
                     title={(

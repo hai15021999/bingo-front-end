@@ -60,4 +60,21 @@ export class GameManagerServices extends CoreServices {
             })
         })
     }
+
+    finishGame$(gameId: string) {
+        return new Observable(observer => {
+            const url = `${this.globalSettings.backendUrl}/api/v1/game-board/finish`;
+            axios.post(url, {
+                gameId: gameId
+            }).then((res) => {
+                observer.next(res.data.value);
+                observer.complete();
+            }).catch((error) => {
+                observer.next({
+                    error: error.message ?? JSON.stringify(error)
+                });
+                observer.complete();
+            })
+        })
+    }
 }

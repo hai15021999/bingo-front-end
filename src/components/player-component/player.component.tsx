@@ -49,6 +49,7 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
 
     const [winner, setWinner] = useState<any>(null);
     const [isShowPopupWinner, setShowPopupWinner] = useState(false);
+    const [isUserBingo, setIsUserBingo] = useState(false);
 
     return (
         <div className='__app-player-page'>
@@ -92,6 +93,7 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
                 onClosePopup={() => {
                     setShowPopupWinner(false);
                 }}
+                isUserBingo={isUserBingo}
                 /> : <></> : <></>
             }
             <div className='__app-stepper-block'>
@@ -149,6 +151,9 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
                             if (res['isBingo'] && res['winner'].length > 0 && res['winner'].length !== winner?.length) {
                                 setWinner(res['winner']);
                                 setShowPopupWinner(true);
+                                if (res['winner'].includes(player)) {
+                                    setIsUserBingo(true);
+                                }
                             }
 
                         }

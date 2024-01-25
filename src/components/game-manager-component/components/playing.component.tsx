@@ -1,25 +1,39 @@
 import { Button } from "antd";
-import toast from "react-hot-toast";
+import { useState } from "react";
 
 interface IPlayingPageProps {
     players: string[];
     nextNumber: number;
     listNumber: number[];
     onGenerateNumber: (callback: () => void) => void;
+    onEndGameCallback: (callback: () => void) => void;
 }
 
 export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
-
+    const [isProccess, setProcessing] = useState(false);
+    
     return (
         <div className="__app-main playing">
             <div className="__app-header-toolbar">
-            <div className="__app-player-count">
-                    <div className="__app-count">{ props.players.length }</div>
+                <div className="__app-player-count">
+                    <div className="__app-count">{props.players.length}</div>
                     <div className="__app-title">Players</div>
                 </div>
                 <div className="__app-logo">Quản Trò!</div>
                 <div className="__app-play-button">
-                    <span style={{ padding: '12px 56px' }}></span>
+                    <Button
+                        type='primary'
+                        className='__app-form-button'
+                        onClick={(e) => {
+                            e.preventDefault();
+                            setProcessing(true);
+                            props.onEndGameCallback(() => {
+                                setProcessing(false);
+                            })
+                        }}
+                    >
+                        Bắt đầu
+                    </Button>
                 </div>
             </div>
             <div className="__app-playing-container">
@@ -28,7 +42,7 @@ export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
                         props.listNumber.reverse().reduce((acc: any[], cur) => {
                             acc.push(
                                 <div className="__app-number-previous" key={cur}>
-                                    { cur }
+                                    {cur}
                                 </div>
                             );
                             return acc;
