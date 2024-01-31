@@ -1,16 +1,9 @@
 import { Observable } from "rxjs";
 import { CoreServices } from "../../common/services/service.core";
 import axios from "axios";
-import { SocketService } from "../../common/services/socket-io.service";
 
 
 export class PlayerServices extends CoreServices {
-
-    socketService: SocketService;
-    constructor() {
-        super();
-        this.socketService = new SocketService();
-    }
     
     ensureGameBoard$(gameId: string) {
         return new Observable(observer => {
@@ -20,7 +13,7 @@ export class PlayerServices extends CoreServices {
                 observer.complete();
             }).catch((error) => {
                 observer.next({
-                    error: error.message ?? JSON.stringify(error)
+                    error: error.response?.data?.value?.message ?? error.message ?? JSON.stringify(error)
                 });
                 observer.complete();
             })
@@ -36,7 +29,7 @@ export class PlayerServices extends CoreServices {
                 observer.complete();
             }).catch((error) => {
                 observer.next({
-                    error: error.message ?? JSON.stringify(error)
+                    error: error.response?.data?.value?.message ?? error.message ?? JSON.stringify(error)
                 });
                 observer.complete();
             })
@@ -52,7 +45,7 @@ export class PlayerServices extends CoreServices {
                 observer.complete();
             }).catch((error) => {
                 observer.next({
-                    error: error.message ?? JSON.stringify(error)
+                    error: error.response?.data?.value?.message ?? error.message ?? JSON.stringify(error)
                 });
                 observer.complete();
             })
@@ -68,7 +61,7 @@ export class PlayerServices extends CoreServices {
                 observer.complete();
             }).catch((error) => {
                 observer.next({
-                    error: error.message ?? JSON.stringify(error)
+                    error: error.response?.data?.value?.message ?? error.message ?? JSON.stringify(error)
                 });
                 observer.complete();
             })
@@ -84,7 +77,7 @@ export class PlayerServices extends CoreServices {
                 observer.complete();
             }).catch((error) => {
                 observer.next({
-                    error: error.message ?? JSON.stringify(error)
+                    error: error.response?.data?.value?.message ?? error.message ?? JSON.stringify(error)
                 });
                 observer.complete();
             })

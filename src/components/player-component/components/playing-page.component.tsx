@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PaperColor, PaperData } from "../../../configs/paper.config";
-import { Button, Modal } from "antd";
+import { Button, Modal, Spin } from "antd";
 import toast from "react-hot-toast";
 
 interface IPlayingPageProps {
@@ -17,11 +17,25 @@ interface IPlayingPageProps {
     onBingo: (row: number[], paperId: string) => void;
     onClosePopup: () => void;
     isUserBingo: boolean;
+    isGenerateNumber: boolean;
 }
 
 export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
     const [selectedNumber, setSelectedNumber] = useState<number[]>([]);
     const [hasWinner, setHasWinner] = useState(false);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(() => {
+        if (!selectedNumber.includes(props.nextNumber) && props.listNumber.includes(props.nextNumber)) {
+            const isAutoPick = localStorage.getItem(`AutoPick`);
+            if (isAutoPick) {
+                const temp = [...selectedNumber];
+                temp.push(props.nextNumber);
+                setSelectedNumber(temp);
+                checkBeforeBingo(props.nextNumber);
+            }
+        }
+    })
 
     return (
         <div className="__app-main playing">
@@ -51,7 +65,13 @@ export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
                     </div>
                     <div className="__app-next-number-block">
                         <div className="__app-next-title">Số tiếp theo:</div>
-                        <div className="__app-next-number">{props.nextNumber > 0 ? props.nextNumber : '-'}</div>
+                        {
+                            props.isGenerateNumber ?
+                                <div className="__app-generate-loading">
+                                    <Spin size="large" />
+                                </div> :
+                                <div className="__app-next-number">{props.nextNumber > 0 ? props.nextNumber : '-'}</div>
+                        }
                     </div>
                     <div className="__app-submit-btn">
                         <div className="__app-container-button">
@@ -89,7 +109,7 @@ export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
                     centered
                 >
                     <div className="__dialog-content" style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span><strong>{ props.isShowPopupWinner.winner?.join(', ') ?? '' }</strong> đã kinh.</span>
+                        <span><strong>{props.isShowPopupWinner.winner?.join(', ') ?? ''}</strong> đã kinh.</span>
                         <span>Đóng thông báo và báo kinh trùng nếu bạn cũng kinh.</span>
                     </div>
                 </Modal> : <></>

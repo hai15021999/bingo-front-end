@@ -1,18 +1,19 @@
-import toast from 'react-hot-toast';
+import toast, { useToasterStore } from 'react-hot-toast';
 import { CommonUtility } from '../../common/utils/utilities';
 import { CreateGameComponent } from './components/create-game.component';
 import { LoginComponent } from './components/login-manager.component';
 import './game-manager.component.scss';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Steps } from 'antd';
-import { GameManagerServices } from './game-manager.service';
 import { take } from 'rxjs';
 import { WaitingComponent } from './components/waiting.component';
 import { PlayingPageComponent } from './components/playing.component';
+import { SocketService } from '../../common/services/socket-io.service';
+import { AppContext } from '../../App';
 
 
 interface IGameManagerProps {
-
+    socketService: SocketService
 }
 
 enum StepperStateEnum {
@@ -24,15 +25,21 @@ enum StepperStateEnum {
 }
 
 export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
-    const managerService = new GameManagerServices();
+    const { toasts } = useToasterStore();
+
+    useEffect(() => {
+        toasts
+            .filter(t => t.visible) // Only consider visible toasts
+            .filter((item, i) => i >= 3) // Is toast index over limit
+            .forEach(t => toast.dismiss(t.id)); // Dismiss – Use toast.remove(t.id) removal without animation
+    }, [toasts]);
+    
+    const { managerService } = useContext(AppContext);
 
     const [gameId, setGameId] = useState('');
     const [gameManager, setGameManager] = useState<any>(null);
     const [players, setPlayers] = useState([]);
     const [isInit, setInit] = useState(false);
-    /**
-     * @description state for current activity of game manager
-     */
     const [currentPage, setCurrentPage] = useState<'login' | 'creating' | 'waiting' | 'playing' | 'recording'>('login');
     const [listNumber, setListNumber] = useState<number[]>([]);
     const [currentNumber, setCurrentNumber] = useState(-1);
@@ -64,7 +71,13 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
                 }} /> : <></>
             }
             {
-                currentPage === 'waiting' ? <WaitingComponent gameId={gameId} players={players} onStartGameCallback={(callback) => {
+                currentPage === 'waiting' ? <WaitingComponent 
+                gameId={gameId} 
+                players={players} 
+                onRemovePlayerCallback={(player) => {
+                    onRemovePlayer(player);
+                }}
+                onStartGameCallback={(callback) => {
                     onStartGame(callback);
                 }} /> : <></>
             }
@@ -97,25 +110,18 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
     )
 
     function onLogin(username: string, password: string, callback: any) {
-        if (verifyManager(username, password)) {
-            setGameManager(manager);
-            setCurrentPage('creating');
-            localStorage.setItem('gameManager', JSON.stringify(manager));
-        } else {
-            toast.error(`Sai thông tin đăng nhập.`);
-            callback();
-        }
-    }
-
-    function verifyManager(username: string, password: string) {
-        if (username !== manager.username) {
-            return false;
-        }
-        console.log(CommonUtility.hashDJB2(password));
-        if (CommonUtility.hashDJB2(password) === manager.password) {
-            return true;
-        }
-        return false;
+        managerService.login$(username, password).pipe(take(1)).subscribe({
+            next: (res: any) => {
+                if (res.error) {
+                    toast.error(`Sai thông tin đăng nhập.`);
+                    callback();
+                } else {
+                    setGameManager(res);
+                    setCurrentPage('creating');
+                    localStorage.setItem('gameManager', JSON.stringify(res));
+                }
+            }
+        });
     }
 
     function onCreateGame(callback: any) {
@@ -141,6 +147,14 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
                             }
                         }
                     })
+                    managerService.socketService.listenKeySocket(`${res}_remove_player`).subscribe({
+                        next: res => {
+                            if (res) {
+                                const _players = players.filter(item => item !== res);
+                                setPlayers(_players);
+                            }
+                        }
+                    })
                 }
             }
         })
@@ -154,6 +168,16 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
                     callback();
                 } else {
                     setCurrentPage('playing');
+                }
+            }
+        })
+    }
+
+    function onRemovePlayer(_player: string) {
+        managerService.removePlayer$(gameId, _player).pipe(take(1)).subscribe({
+            next: (res: any) => {
+                if (res.error) {
+                    toast.error(res.error);
                 }
             }
         })
@@ -189,8 +213,8 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
     }
 }
 
-const manager = {
-    username: 'haipnguyen',
-    password: 1432205327,
-    role: 'manager',
-}
+// const manager = {
+//     username: 'haipnguyen',
+//     password: 1432205327,
+//     role: 'manager',
+// }

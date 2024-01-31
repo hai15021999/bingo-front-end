@@ -1,39 +1,50 @@
-import React, { useEffect } from 'react';
+import React, { createContext } from 'react';
 import './App.scss';
 import {
   createBrowserRouter,
   Navigate,
   RouterProvider,
 } from 'react-router-dom';
-import toast, { Toaster, useToasterStore } from 'react-hot-toast';
 import { GameManagerPage } from './components/game-manager-component/game-manager.component';
 import { ErrorPage } from './components/error-pages/error-page';
 import { ConfigProvider } from 'antd';
 import { ComponentThemeConfig } from './configs/component.config';
 import { PlayerPage } from './components/player-component/player.component';
+import { SocketService } from './common/services/socket-io.service';
+import { Toaster } from 'react-hot-toast';
+import { PlayerServices } from './components/player-component/player.service';
+import { GameManagerServices } from './components/game-manager-component/game-manager.service';
+
+const socketService = new SocketService();
+const playerService = new PlayerServices(socketService);
+const managerService = new GameManagerServices(socketService);
+const AppContext = createContext({
+  playerService,
+  managerService
+});
+const AppProviderPlayer = ({ children }: any) => {
+  return <AppContext.Provider value={{
+    playerService,
+    managerService
+  }}>{children}</AppContext.Provider>;
+};
 
 function App() {
-
-  const { toasts } = useToasterStore()
-
-  useEffect(() => {
-    toasts
-      .filter(t => t.visible) // Only consider visible toasts
-      .filter((item, i) => i >= 3) // Is toast index over limit
-      .forEach(t => toast.dismiss(t.id)) // Dismiss – Use toast.remove(t.id) removal without animation
-  }, [toasts])
 
   const rootRouter = createBrowserRouter([
     {
       path: '/game-manager',
       element: <ConfigProvider theme={ComponentThemeConfig}>
-        <GameManagerPage />
+        <GameManagerPage socketService={socketService} />
       </ConfigProvider>,
     },
     {
       path: '/gaming',
       element: <ConfigProvider theme={ComponentThemeConfig}>
-        <PlayerPage />
+        <AppProviderPlayer>
+          {/* <PlayerPage socketService={socketService} /> */}
+          <PlayerPage />
+        </AppProviderPlayer>
       </ConfigProvider>,
     },
     {
@@ -61,3 +72,4 @@ function App() {
 }
 
 export default App;
+export { AppProviderPlayer, AppContext }

@@ -32,7 +32,7 @@ export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
                             })
                         }}
                     >
-                        Bắt đầu
+                        Kết thúc
                     </Button>
                 </div>
             </div>

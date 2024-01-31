@@ -364,6 +364,22 @@
                             display: flex;
                             align-items: center;
                         }
+
+                        .__app-generate-loading {
+                            min-height: 160px;
+                            display: flex;
+                            align-items: center;
+
+                            .ant-spin-dot {
+                                font-size: 135px;
+                                
+                                .ant-spin-dot-item {
+                                    width: 45px !important;
+                                    height: 45px !important;
+                                    background-color:rgb(255, 255, 255) !important;
+                                }
+                            }
+                        }
                     }
 
                     .__app-submit-btn {

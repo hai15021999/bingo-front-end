@@ -5,6 +5,7 @@ import { useState } from "react";
 
 interface IWaitingProps {
     onStartGameCallback: (callback: () => void) => void;
+    onRemovePlayerCallback: (player: string) => void;
     players: string[];
     gameId: string;
 }
@@ -41,7 +42,13 @@ export const WaitingComponent: React.FC<IWaitingProps> = (props) => {
                 <div className="__app-list-players">
                     {
                         props.players.reduce((acc: any[], cur) => {
-                            acc.push(<div className="__app-player-name" key={`player_${cur}`}>{cur}</div>)
+                            acc.push(
+                            <div className="__app-player-name" key={`player_${cur}`} onClick={() => {
+                                props.onRemovePlayerCallback(cur);
+                            }}>
+                                {cur}
+                            </div>
+                            )
                             return acc;
                         }, [])
                     }
