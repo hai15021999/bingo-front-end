@@ -16,6 +16,24 @@ interface IPlayerProps {
     // socketService: SocketService
 }
 
+interface IPlayerState {
+    gameId: string;
+    player: string;
+    selectedPapers: string[];
+    paperDisable: string[];
+    gameStatus: string;
+    listPlayers: string[];
+    currentNumber: number;
+    previousNumber: number;
+    listNumber: number[];
+    currentPage: 'join' | 'register' | 'pick' | 'play';
+    winner: any;
+    isShowPopupWinner: boolean;
+    isUserBingo: boolean;
+    isGenerateNumber: boolean;
+    removedPlayer: null | string;
+}
+
 /**
     * @description state for current activity of player
     * - join is input game id step
@@ -30,78 +48,87 @@ enum StepperStateEnum {
     'play'
 }
 
+const initState: IPlayerState = {
+    gameId: '',
+    player: '',
+    selectedPapers: [],
+    paperDisable: [],
+    gameStatus: 'new',
+    listPlayers: [],
+    currentNumber: -1,
+    previousNumber: -1,
+    listNumber: [],
+    currentPage: 'join',
+    winner: null,
+    isShowPopupWinner: false,
+    isUserBingo: false,
+    isGenerateNumber: false,
+    removedPlayer: null
+}
+
 export const PlayerPage: React.FC<IPlayerProps> = (props) => {
 
     const { playerService } = useContext(AppContext);
 
     const { toasts } = useToasterStore();
-    const [gameId, setGameId] = useState('');
-    const [player, setPlayer] = useState('');
-    const [selectedPapers, setSelectedPapers] = useState<string[]>([])
-    const [paperDisable, setPaperDisable] = useState([]);
-    const [gameStatus, setGameStatus] = useState('new');
-    const [listPlayers, setListPlayers] = useState<string[]>([]);
-    const [currentNumber, setCurrentNumber] = useState(-1);
-    const [previousNumber, setPreviousNumber] = useState(-1);
-    const [listNumber, setListNumber] = useState<number[]>([]);
-    const [currentPage, setCurrentPage] = useState<'join' | 'register' | 'pick' | 'play'>('join');
-    const [winner, setWinner] = useState<any>(null);
-    const [isShowPopupWinner, setShowPopupWinner] = useState(false);
-    const [isUserBingo, setIsUserBingo] = useState(false);
-    const [isGenerateNumber, setGeneratingNumber] = useState(false);
-    const [removedPlayer, setRemovedPlayer] = useState<null | string>(null);
+
+    const [state, setState] = useState<IPlayerState>(initState)
 
     useEffect(() => {
         toasts
             .filter(t => t.visible) // Only consider visible toasts
             .filter((item, i) => i >= 3) // Is toast index over limit
             .forEach(t => toast.dismiss(t.id)); // Dismiss – Use toast.remove(t.id) removal without animation
-        if (!isUserBingo && winner?.length > 0 && winner?.includes(player)) {
-            setIsUserBingo(true);
+        if (!state.isUserBingo && state.winner?.length > 0 && state.winner?.includes(state.player)) {
+            setState((preState) => {
+                return { ...preState, isUserBingo: true }
+            })
         }
-        if (removedPlayer) {
-            if (player === removedPlayer) {
+        if (state.removedPlayer) {
+            if (state.player === state.removedPlayer) {
                 toast.error('You have been kicked out of this game!', {
                     duration: 5000
                 });
                 onClearState();
             }
-            setRemovedPlayer(null);
+            setState((preState) => {
+                return { ...preState, removedPlayer: null }
+            })
         }
-    }, [isUserBingo, player, removedPlayer, toasts, winner]);
+    }, [state, toasts]);
 
     return (
         <div className='__app-player-page'>
             <div className='__app-background-shape-left'></div>
             <div className='__app-background-shape-rignt'></div>
             {
-                currentPage === 'join' ? <JoinGameComponent onJoinGameCallback={(_gameId, callback) => {
+                state.currentPage === 'join' ? <JoinGameComponent onJoinGameCallback={(_gameId, callback) => {
                     onJoinGame(_gameId, callback);
                 }} /> : <></>
             }
             {
-                currentPage === 'register' ? <RegisterComponent onRegisterCallback={(_player, callback) => {
+                state.currentPage === 'register' ? <RegisterComponent onRegisterCallback={(_player, callback) => {
                     onRegisterPlayer(_player, callback);
                 }} /> : <></>
             }
             {
-                currentPage === 'pick' ? <PickComponent paperDisable={paperDisable} onPickCallback={(paperIds, callback) => {
+                state.currentPage === 'pick' ? <PickComponent paperDisable={state.paperDisable} onPickCallback={(paperIds, callback) => {
                     onSelectPapers(paperIds, callback);
                 }} /> : <></>
             }
             {
-                currentPage === 'play' ? gameStatus === 'new' ? <WaitingComponent gameId={gameId} players={listPlayers} /> : <></> : <></>
+                state.currentPage === 'play' ? state.gameStatus === 'new' ? <WaitingComponent gameId={state.gameId} players={state.listPlayers} /> : <></> : <></>
             }
             {
-                currentPage === 'play' ? gameStatus === 'playing' ? <PlayingPageComponent
-                    preNumber={previousNumber}
-                    listNumber={listNumber}
-                    nextNumber={currentNumber}
-                    paperIds={selectedPapers}
-                    players={listPlayers}
+                state.currentPage === 'play' ? state.gameStatus === 'playing' ? <PlayingPageComponent
+                    preNumber={state.previousNumber}
+                    listNumber={state.listNumber}
+                    nextNumber={state.currentNumber}
+                    paperIds={state.selectedPapers}
+                    players={state.listPlayers}
                     isShowPopupWinner={{
-                        isShow: isShowPopupWinner,
-                        winner: winner
+                        isShow: state.isShowPopupWinner,
+                        winner: state.winner
                     }}
                     onWaitingBingo={() => {
                         notifyWaitingBingo();
@@ -110,15 +137,17 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
                         verifyBingo(row, paperId);
                     }}
                     onClosePopup={() => {
-                        setShowPopupWinner(false);
+                        setState((preState) => {
+                            return { ...preState, isShowPopupWinner: false }
+                        })
                     }}
-                    isUserBingo={isUserBingo}
-                    isGenerateNumber={isGenerateNumber}
+                    isUserBingo={state.isUserBingo}
+                    isGenerateNumber={state.isGenerateNumber}
                 /> : <></> : <></>
             }
             <div className='__app-stepper-block'>
                 <Steps
-                    current={StepperStateEnum[currentPage]}
+                    current={StepperStateEnum[state.currentPage]}
                     status='process'
                     items={[
                         {
@@ -154,10 +183,15 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
                     toast.error(`Game không tồn tại.`);
                     callback();
                 } else {
-                    setGameId(_gameId);
+                    // setGameId(_gameId);
+                    setState((preState) => {
+                        return { ...preState, gameId: _gameId }
+                    })
                     processWebSocketEmitEvent$(_gameId).subscribe({
                         next: () => {
-                            setCurrentPage('register');
+                            setState((preState) => {
+                                return { ...preState, currentPage: 'register' }
+                            })
                         }
                     })
                 }
@@ -177,12 +211,15 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
             playerService.socketService.listenKeySocket(`${_gameId}_generate_number`).subscribe({
                 next: res => {
                     if (res) {
-                        setGeneratingNumber(true);
+                        // setGeneratingNumber(true);
+                        setState((preState) => {
+                            return { ...preState, isGenerateNumber: true }
+                        })
                         timer(1200).pipe(take(1)).subscribe({
                             next: () => {
-                                console.log(currentNumber);
-                                setCurrentNumber(res);
-                                setGeneratingNumber(false);
+                                setState((preState) => {
+                                    return { ...preState, currentNumber: res, isGenerateNumber: false }
+                                })
                             }
                         })
                     }
@@ -191,17 +228,23 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
             playerService.socketService.listenKeySocket(`${_gameId}_winner`).subscribe({
                 next: res => {
                     if (res) {
-                        setWinner(res);
-                        setShowPopupWinner(true);
+                        setState((preState) => ({
+                            ...preState,
+                            winner: res,
+                            isShowPopupWinner: true
+                        }))
                     }
                 }
             });
             playerService.socketService.listenKeySocket(`${_gameId}_remove_player`).subscribe({
                 next: res => {
                     if (res) {
-                        const _players = listPlayers.filter(item => item !== res);
-                        setRemovedPlayer(res);
-                        setListPlayers(_players);
+                        const _players = state.listPlayers.filter(item => item !== res);
+                        setState((preState) => ({
+                            ...preState,
+                            removedPlayer: res,
+                            listPlayers: _players
+                        }))
                     }
                 }
             })
@@ -211,13 +254,22 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
     }
 
     function processEventEmitted(res: any) {
-        setPaperDisable(res.selectedPapers);
-        setListPlayers(res.players);
-        if (gameStatus === 'new' && res.status === 'playing') {
-            setGameStatus(res.status);
+        setState((preState) => ({
+            ...preState,
+            paperDisable: res.selectedPapers,
+            listPlayers: res.players
+        }))
+        if (state.gameStatus === 'new' && res.status === 'playing') {
+            setState((preState) => ({
+                ...preState,
+                gameStatus: res.status,
+            }))
         }
-        setListNumber(res.result);
-        setPreviousNumber([...res.result].reverse()[1] ?? -1);
+        setState((preState) => ({
+            ...preState,
+            listNumber: res.result,
+            previousNumber: [...res.result].reverse()[1] ?? -1
+        }))
         if (res['waitingPlayer']) {
             toast.loading(`${res['waitingPlayer']} đợi...`);
         }
@@ -229,8 +281,11 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
             callback();
             return;
         }
-        setPlayer(_player);
-        playerService.registerPlayer$(gameId, _player).pipe(take(1)).subscribe({
+        setState((preState) => ({
+            ...preState,
+            player: _player,
+        }))
+        playerService.registerPlayer$(state.gameId, _player).pipe(take(1)).subscribe({
             next: (res: any) => {
                 if (CommonUtility.isNullOrUndefined(res)) {
                     toast.error(`Lỗi hệ thống. Vui lòng thử lại.`);
@@ -239,7 +294,10 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
                     toast.error(res.error);
                     callback();
                 } else {
-                    setCurrentPage('pick');
+                    setState((preState) => ({
+                        ...preState,
+                        currentPage: 'pick',
+                    }))
                 }
             }
         })
@@ -251,8 +309,11 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
             callback();
             return;
         }
-        setSelectedPapers(paperIds);
-        playerService.pickPapers$(gameId, player, paperIds).pipe(take(1)).subscribe({
+        setState((preState) => ({
+            ...preState,
+            selectedPapers: paperIds,
+        }))
+        playerService.pickPapers$(state.gameId, state.player, paperIds).pipe(take(1)).subscribe({
             next: (res: any) => {
                 if (CommonUtility.isNullOrUndefined(res)) {
                     toast.error(`Lỗi hệ thống. Vui lòng thử lại.`);
@@ -261,18 +322,21 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
                     toast.error(res.error);
                     callback();
                 } else {
-                    setCurrentPage('play');
+                    setState((preState) => ({
+                        ...preState,
+                        currentPage: 'play',
+                    }))
                 }
             }
         })
     }
 
     function notifyWaitingBingo() {
-        playerService.notifyWaitingBingo$(gameId, player).pipe(take(1)).subscribe();
+        playerService.notifyWaitingBingo$(state.gameId, state.player).pipe(take(1)).subscribe();
     }
 
     function verifyBingo(row: number[], paperId: string) {
-        playerService.notifyBingo$(gameId, player, paperId, row).pipe(take(1)).subscribe({
+        playerService.notifyBingo$(state.gameId, state.player, paperId, row).pipe(take(1)).subscribe({
             next: (res: any) => {
                 if (res.error) {
                     toast.error(`Kinh hụt`);
@@ -282,15 +346,6 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
     }
 
     function onClearState() {
-        setGameId('');
-        setPlayer('');
-        setSelectedPapers([]);
-        setPaperDisable([]);
-        setGameStatus('new');
-        setListPlayers([]);
-        setCurrentNumber(-1)
-        setPreviousNumber(-1)
-        setListNumber([])
-        setCurrentPage('join');
+        setState(initState);
     }
 }

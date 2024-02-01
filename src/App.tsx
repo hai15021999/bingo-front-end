@@ -35,7 +35,11 @@ function App() {
     {
       path: '/game-manager',
       element: <ConfigProvider theme={ComponentThemeConfig}>
-        <GameManagerPage socketService={socketService} />
+        {/* <GameManagerPage socketService={socketService} /> */}
+        <AppProviderPlayer>
+          {/* <PlayerPage socketService={socketService} /> */}
+          <GameManagerPage />
+        </AppProviderPlayer>
       </ConfigProvider>,
     },
     {
