@@ -31,7 +31,7 @@ interface IPlayerState {
     isShowPopupWinner: boolean;
     isUserBingo: boolean;
     isGenerateNumber: boolean;
-    removedPlayer: null | string;
+    // removedPlayer: null | string;
 }
 
 /**
@@ -63,7 +63,7 @@ const initState: IPlayerState = {
     isShowPopupWinner: false,
     isUserBingo: false,
     isGenerateNumber: false,
-    removedPlayer: null
+    // removedPlayer: null
 }
 
 export const PlayerPage: React.FC<IPlayerProps> = (props) => {
@@ -72,7 +72,8 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
 
     const { toasts } = useToasterStore();
 
-    const [state, setState] = useState<IPlayerState>(initState)
+    const [state, setState] = useState<IPlayerState>(initState);
+    const [removedPlayer, setRemovedPlayer] = useState<null | string>(null);
 
     useEffect(() => {
         toasts
@@ -84,18 +85,23 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
                 return { ...preState, isUserBingo: true }
             })
         }
-        if (state.removedPlayer) {
-            if (state.player === state.removedPlayer) {
+        if (removedPlayer) {
+            if (state.player === removedPlayer) {
                 toast.error('You have been kicked out of this game!', {
                     duration: 5000
                 });
+                playerService.socketService.removeListenKey(state.gameId);
                 onClearState();
+            } else {
+                const _players = state.listPlayers.filter(item => item !== removedPlayer);
+                setState((preState) => ({
+                    ...preState,
+                    listPlayers: _players
+                }))
             }
-            setState((preState) => {
-                return { ...preState, removedPlayer: null }
-            })
+            setRemovedPlayer(null);
         }
-    }, [state, toasts]);
+    }, [playerService.socketService, removedPlayer, state, toasts]);
 
     return (
         <div className='__app-player-page'>
@@ -239,12 +245,7 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
             playerService.socketService.listenKeySocket(`${_gameId}_remove_player`).subscribe({
                 next: res => {
                     if (res) {
-                        const _players = state.listPlayers.filter(item => item !== res);
-                        setState((preState) => ({
-                            ...preState,
-                            removedPlayer: res,
-                            listPlayers: _players
-                        }))
+                        setRemovedPlayer(res);
                     }
                 }
             })

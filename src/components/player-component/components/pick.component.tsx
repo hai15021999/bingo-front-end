@@ -1,16 +1,35 @@
 import { CheckOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PaperIds } from '../../../configs/paper.config';
 
 interface IPickProps {
     onPickCallback: (papers: string[], callback: () => void) => void;
-    paperDisable: any[]
+    paperDisable: string[];
 }
 
 export const PickComponent: React.FC<IPickProps> = (props) => {
     const [isProccess, setProcessing] = useState(false);
     const [papersChoosen, setPapersChoosen] = useState<string[]>([]);
+    const [papersTaken, setPaperTaken] = useState<string[]>([])
+
+    useEffect(() => {
+        if (props.paperDisable.length !== papersTaken.length) {
+            const invalidPapers = papersChoosen.reduce((acc: string[], cur) => {
+                if (props.paperDisable.includes(cur)) {
+                    acc.push(cur);
+                }
+                return acc;
+            }, []);
+            if (invalidPapers.length === 2) {
+                setPapersChoosen([]);
+            } else if (invalidPapers.length === 1) {
+                const validPaper = papersChoosen.find(item => item !== invalidPapers[0]);
+                setPapersChoosen([validPaper ?? '']);
+            }
+            setPaperTaken(props.paperDisable);
+        }
+    }, [props.paperDisable, papersTaken.length, papersChoosen])
 
     return (
         <div className='__app-main pick'>

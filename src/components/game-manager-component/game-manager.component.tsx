@@ -46,33 +46,17 @@ const initState: IGameManagerState = {
 
 export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
     const { toasts } = useToasterStore();
+    const [removedPlayer, setRemovedPlayer] = useState<null | string>(null);
+    const [state, setState] = useState(initState);
 
     useEffect(() => {
         toasts
             .filter(t => t.visible) // Only consider visible toasts
             .filter((item, i) => i >= 3) // Is toast index over limit
             .forEach(t => toast.dismiss(t.id)); // Dismiss – Use toast.remove(t.id) removal without animation
-    }, [toasts]);
-    
-    const { managerService } = useContext(AppContext);
-
-    // const [gameId, setGameId] = useState('');
-    // const [gameManager, setGameManager] = useState<any>(null);
-    // const [players, setPlayers] = useState([]);
-    // const [isInit, setInit] = useState(false);
-    // const [currentPage, setCurrentPage] = useState<'login' | 'creating' | 'waiting' | 'playing' | 'recording'>('login');
-    // const [listNumber, setListNumber] = useState<number[]>([]);
-    // const [currentNumber, setCurrentNumber] = useState(-1);
-    // const [winner, setWinner] = useState<any>(null);
-
-    const [state, setState] = useState(initState);
-
-    useEffect(() => {
         if (!state.isInit) {
             const manager = localStorage.getItem('gameManager');
             if (manager) {
-                // setGameManager(JSON.parse(manager));
-                // setCurrentPage('creating');
                 setState((preState) => ({
                     ...preState,
                     gameManager: JSON.parse(manager),
@@ -84,7 +68,17 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
                 isInit: true,
             }))
         }
-    }, [state]);
+        if (removedPlayer) {
+            const _players = state.players.filter(item => item !== removedPlayer);
+            setState((preState) => ({
+                ...preState,
+                players: _players
+            }))
+            setRemovedPlayer(null);
+        }
+    }, [removedPlayer, state.isInit, state.players, toasts]);
+
+    const { managerService } = useContext(AppContext);
 
     return (
         <div className="__app-game-manager-page">
@@ -101,64 +95,74 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
                 }} /> : <></>
             }
             {
-                state.currentPage === 'waiting' ? <WaitingComponent 
-                gameId={state.gameId} 
-                players={state.players} 
-                onRemovePlayerCallback={(player) => {
-                    onRemovePlayer(player);
-                }}
-                onStartGameCallback={(callback) => {
-                    onStartGame(callback);
-                }} /> : <></>
+                state.currentPage === 'waiting' ? <WaitingComponent
+                    gameId={state.gameId}
+                    players={state.players}
+                    onRemovePlayerCallback={(player) => {
+                        onRemovePlayer(player);
+                    }}
+                    onStartGameCallback={(callback) => {
+                        onStartGame(callback);
+                    }} /> : <></>
             }
             {
-                state.currentPage === 'playing' ? <PlayingPageComponent 
-                players={state.players} 
-                listNumber={state.listNumber} 
-                nextNumber={state.currentNumber} 
-                onEndGameCallback={(callback) => {
-                    onEndGame(callback);
-                }}
-                onGenerateNumber={(callback) => {
-                    onGenerateNextNumber(callback);
-                }} /> : <></>
+                state.currentPage === 'playing' ? <PlayingPageComponent
+                    players={state.players}
+                    listNumber={state.listNumber}
+                    nextNumber={state.currentNumber}
+                    onEndGameCallback={(callback) => {
+                        onEndGame(callback);
+                    }}
+                    onGenerateNumber={(callback) => {
+                        onGenerateNextNumber(callback);
+                    }} /> : <></>
             }
             <div className="__app-stepper-block">
                 <Steps
                     current={StepperStateEnum[state.currentPage]}
                     status='process'
                     items={[
-                        { title: 'Đăng nhập', onClick: () => { 
-                            // setCurrentPage('login');
-                            setState((preState) => ({
-                                ...preState,
-                                currentPage: 'login',
-                            }))
-                        }, style: { cursor: 'pointer' }},
-                        { title: 'Tạo game', onClick: () => { 
-                            StepperStateEnum[state.currentPage] > 1 && setState((preState) => ({
-                                ...preState,
-                                currentPage: 'creating',
-                            })) 
-                        }, style: { cursor: StepperStateEnum[state.currentPage] > 0 ? 'pointer' : 'not-allowed' }},
-                        { title: 'Đợi người chơi', onClick: () => { 
-                            StepperStateEnum[state.currentPage] > 2 && setState((preState) => ({
-                                ...preState,
-                                currentPage: 'waiting',
-                            }))
-                        }, style: { cursor: StepperStateEnum[state.currentPage] > 1 ? 'pointer' : 'not-allowed' } },
-                        { title: 'Chơi', onClick: () => { 
-                            StepperStateEnum[state.currentPage] > 3 && setState((preState) => ({
-                                ...preState,
-                                currentPage: 'playing',
-                            }))
-                        }, style: { cursor: StepperStateEnum[state.currentPage] > 2 ? 'pointer' : 'not-allowed' } },
-                        { title: 'Kết quả', onClick: () => { 
-                            StepperStateEnum[state.currentPage] > 4 && setState((preState) => ({
-                                ...preState,
-                                currentPage: 'recording',
-                            })) 
-                        }, style: { cursor: StepperStateEnum[state.currentPage] > 3 ? 'pointer' : 'not-allowed' } },
+                        {
+                            title: 'Đăng nhập', onClick: () => {
+                                // setCurrentPage('login');
+                                setState((preState) => ({
+                                    ...preState,
+                                    currentPage: 'login',
+                                }))
+                            }, style: { cursor: 'pointer' }
+                        },
+                        {
+                            title: 'Tạo game', onClick: () => {
+                                StepperStateEnum[state.currentPage] > 1 && setState((preState) => ({
+                                    ...preState,
+                                    currentPage: 'creating',
+                                }))
+                            }, style: { cursor: StepperStateEnum[state.currentPage] > 0 ? 'pointer' : 'not-allowed' }
+                        },
+                        {
+                            title: 'Đợi người chơi', onClick: () => {
+                                StepperStateEnum[state.currentPage] > 2 && setState((preState) => ({
+                                    ...preState,
+                                    currentPage: 'waiting',
+                                }))
+                            }, style: { cursor: StepperStateEnum[state.currentPage] > 1 ? 'pointer' : 'not-allowed' }
+                        },
+                        {
+                            title: 'Chơi', onClick: () => {
+                                StepperStateEnum[state.currentPage] > 3 && setState((preState) => ({
+                                    ...preState,
+                                    currentPage: 'playing',
+                                }))
+                            }, style: { cursor: StepperStateEnum[state.currentPage] > 2 ? 'pointer' : 'not-allowed' }
+                        },
+                        {
+                            title: 'Kết quả', onClick: () => {
+                                StepperStateEnum[state.currentPage] > 4 && setState((preState) => ({
+                                    ...preState,
+                                    currentPage: 'recording',
+                                }))
+                            }, style: { cursor: StepperStateEnum[state.currentPage] > 3 ? 'pointer' : 'not-allowed' }
+                        },
                     ]}
                 />
             </div>
@@ -228,12 +232,9 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
                     managerService.socketService.listenKeySocket(`${res}_remove_player`).subscribe({
                         next: res => {
                             if (res) {
-                                const _players = state.players.filter(item => item !== res);
-                                // setPlayers(_players);
-                                setState((preState) => ({
-                                    ...preState,
-                                    players: _players,
-                                }))
+                                if (res) {
+                                    setRemovedPlayer(res);
+                                }
                             }
                         }
                     })
@@ -292,7 +293,7 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
                     toast.error(res.error);
                     callback();
                 } else {
-                    
+
                 }
             }
         })
