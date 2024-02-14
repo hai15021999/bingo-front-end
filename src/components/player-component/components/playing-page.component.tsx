@@ -28,7 +28,7 @@ export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
     useEffect(() => {
         if (!selectedNumber.includes(props.nextNumber) && props.listNumber.includes(props.nextNumber)) {
             const isAutoPick = localStorage.getItem(`AutoPick`);
-            if (isAutoPick) {
+            if (isAutoPick && isAutoPick === 'true') {
                 const temp = [...selectedNumber];
                 temp.push(props.nextNumber);
                 setSelectedNumber(temp);

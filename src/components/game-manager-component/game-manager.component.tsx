@@ -48,6 +48,7 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
     const { toasts } = useToasterStore();
     const [removedPlayer, setRemovedPlayer] = useState<null | string>(null);
     const [state, setState] = useState(initState);
+    const [isRestartGame, setRestartGame] = useState(false);
 
     useEffect(() => {
         toasts
@@ -76,7 +77,11 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
             }))
             setRemovedPlayer(null);
         }
-    }, [removedPlayer, state.isInit, state.players, toasts]);
+        if (isRestartGame) {
+            onRestart();
+            setRestartGame(false);
+        }
+    }, [isRestartGame, removedPlayer, state.isInit, state.players, toasts]);
 
     const { managerService } = useContext(AppContext);
 
@@ -123,45 +128,50 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
                     status='process'
                     items={[
                         {
-                            title: 'Đăng nhập', onClick: () => {
-                                // setCurrentPage('login');
-                                setState((preState) => ({
-                                    ...preState,
-                                    currentPage: 'login',
-                                }))
-                            }, style: { cursor: 'pointer' }
+                            title: 'Đăng nhập', 
+                            // onClick: () => {
+                            //     // setCurrentPage('login');
+                            //     setState((preState) => ({
+                            //         ...preState,
+                            //         currentPage: 'login',
+                            //     }))
+                            // }, style: { cursor: 'pointer' }
                         },
                         {
-                            title: 'Tạo game', onClick: () => {
-                                StepperStateEnum[state.currentPage] > 1 && setState((preState) => ({
-                                    ...preState,
-                                    currentPage: 'creating',
-                                }))
-                            }, style: { cursor: StepperStateEnum[state.currentPage] > 0 ? 'pointer' : 'not-allowed' }
+                            title: 'Tạo game', 
+                            // onClick: () => {
+                            //     StepperStateEnum[state.currentPage] > 1 && setState((preState) => ({
+                            //         ...preState,
+                            //         currentPage: 'creating',
+                            //     }))
+                            // }, style: { cursor: StepperStateEnum[state.currentPage] > 0 ? 'pointer' : 'not-allowed' }
                         },
                         {
-                            title: 'Đợi người chơi', onClick: () => {
-                                StepperStateEnum[state.currentPage] > 2 && setState((preState) => ({
-                                    ...preState,
-                                    currentPage: 'waiting',
-                                }))
-                            }, style: { cursor: StepperStateEnum[state.currentPage] > 1 ? 'pointer' : 'not-allowed' }
+                            title: 'Đợi người chơi', 
+                            // onClick: () => {
+                            //     StepperStateEnum[state.currentPage] > 2 && setState((preState) => ({
+                            //         ...preState,
+                            //         currentPage: 'waiting',
+                            //     }))
+                            // }, style: { cursor: StepperStateEnum[state.currentPage] > 1 ? 'pointer' : 'not-allowed' }
                         },
                         {
-                            title: 'Chơi', onClick: () => {
-                                StepperStateEnum[state.currentPage] > 3 && setState((preState) => ({
-                                    ...preState,
-                                    currentPage: 'playing',
-                                }))
-                            }, style: { cursor: StepperStateEnum[state.currentPage] > 2 ? 'pointer' : 'not-allowed' }
+                            title: 'Chơi', 
+                            // onClick: () => {
+                            //     StepperStateEnum[state.currentPage] > 3 && setState((preState) => ({
+                            //         ...preState,
+                            //         currentPage: 'playing',
+                            //     }))
+                            // }, style: { cursor: StepperStateEnum[state.currentPage] > 2 ? 'pointer' : 'not-allowed' }
                         },
                         {
-                            title: 'Kết quả', onClick: () => {
-                                StepperStateEnum[state.currentPage] > 4 && setState((preState) => ({
-                                    ...preState,
-                                    currentPage: 'recording',
-                                }))
-                            }, style: { cursor: StepperStateEnum[state.currentPage] > 3 ? 'pointer' : 'not-allowed' }
+                            title: 'Kết quả', 
+                            // onClick: () => {
+                            //     StepperStateEnum[state.currentPage] > 4 && setState((preState) => ({
+                            //         ...preState,
+                            //         currentPage: 'recording',
+                            //     }))
+                            // }, style: { cursor: StepperStateEnum[state.currentPage] > 3 ? 'pointer' : 'not-allowed' }
                         },
                     ]}
                 />
@@ -237,6 +247,15 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
                                 }
                             }
                         }
+                    });
+                    managerService.socketService.listenKeySocket(`${res}_restart`).subscribe({
+                        next: res => {
+                            if (res) {
+                                if (res) {
+                                    setRestartGame(true);
+                                }
+                            }
+                        }
                     })
                 }
             }
@@ -277,6 +296,7 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
                     toast.error(res.error);
                     callback();
                 } else {
+                    callback();
                     // const temp = [...listNumber];
                     // temp.push(res);
                     // setListNumber(temp);
@@ -295,6 +315,18 @@ export const GameManagerPage: React.FC<IGameManagerProps> = (props) => {
                 } else {
 
                 }
+            }
+        })
+    }
+
+    function onRestart() {
+        setState(pre => {
+            return {
+                ...pre,
+                listNumber: [],
+                currentNumber: -1,
+                winner: [],
+                currentPage: 'waiting'
             }
         })
     }

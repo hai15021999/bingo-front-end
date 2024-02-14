@@ -74,6 +74,7 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
 
     const [state, setState] = useState<IPlayerState>(initState);
     const [removedPlayer, setRemovedPlayer] = useState<null | string>(null);
+    const [isRestartGame, setRestartGame] = useState(false);
 
     useEffect(() => {
         toasts
@@ -101,7 +102,11 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
             }
             setRemovedPlayer(null);
         }
-    }, [playerService.socketService, removedPlayer, state, toasts]);
+        if (isRestartGame) {
+            onRestart();
+            setRestartGame(false);
+        }
+    }, [isRestartGame, playerService.socketService, removedPlayer, state, toasts]);
 
     return (
         <div className='__app-player-page'>
@@ -248,6 +253,13 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
                         setRemovedPlayer(res);
                     }
                 }
+            });
+            playerService.socketService.listenKeySocket(`${_gameId}_restart`).subscribe({
+                next: res => {
+                    if (res) {
+                        setRestartGame(true);
+                    }
+                }
             })
             obs.next();
             obs.complete();
@@ -348,5 +360,21 @@ export const PlayerPage: React.FC<IPlayerProps> = (props) => {
 
     function onClearState() {
         setState(initState);
+    }
+
+    function onRestart() {
+        setState(pre => {
+            return {
+                ...pre,
+                gameStatus: 'new',
+                currentNumber: -1,
+                previousNumber: -1,
+                listNumber: [],
+                winner: null,
+                isShowPopupWinner: false,
+                isUserBingo: false,
+                isGenerateNumber: false,
+            }
+        })
     }
 }

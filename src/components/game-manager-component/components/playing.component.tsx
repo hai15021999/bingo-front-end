@@ -32,7 +32,7 @@ export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
                             })
                         }}
                     >
-                        Kết thúc
+                        Chơi Lại
                     </Button>
                 </div>
             </div>
@@ -58,10 +58,12 @@ export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
                         <Button
                             type='primary'
                             className='__app-form-button'
+                            disabled={isProccess}
                             onClick={(e) => {
                                 e.preventDefault();
+                                setProcessing(true);
                                 props.onGenerateNumber(() => {
-                                    console.log('callback');
+                                    setProcessing(false);
                                 });
                             }}
                         >

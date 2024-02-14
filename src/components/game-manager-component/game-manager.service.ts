@@ -92,7 +92,7 @@ export class GameManagerServices extends CoreServices {
 
     finishGame$(gameId: string) {
         return new Observable(observer => {
-            const url = `${this.globalSettings.backendUrl}/api/v1/game-board/finish`;
+            const url = `${this.globalSettings.backendUrl}/api/v1/manager/restart`;
             axios.post(url, {
                 gameId: gameId
             }).then((res) => {
