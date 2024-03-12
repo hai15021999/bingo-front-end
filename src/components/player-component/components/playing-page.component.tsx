@@ -3,6 +3,12 @@ import { PaperColor, PaperData } from "../../../configs/paper.config";
 import { Button, Modal, Spin } from "antd";
 import toast from "react-hot-toast";
 
+// Import Swiper styles
+import 'swiper/css';
+import 'swiper/css/effect-cards';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { EffectCards } from 'swiper/modules';
+
 interface IPlayingPageProps {
     players: string[];
     paperIds: string[];
@@ -23,9 +29,25 @@ interface IPlayingPageProps {
 export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
     const [selectedNumber, setSelectedNumber] = useState<number[]>([]);
     const [hasWinner, setHasWinner] = useState(false);
+    const [screenType, setScreenType] = useState<'large' | 'small'>('large');
+    const [isInit, setInit] = useState(false);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
+        if (!isInit) {
+            window.addEventListener("resize", () => {
+                if (window.innerWidth < 1100) {
+                    setScreenType('small');
+                } else {
+                    setScreenType('large');
+                }
+            });
+            if (window.innerWidth < 1100) {
+                setScreenType('small');
+            } else {
+                setScreenType('large');
+            }
+            setInit(true);
+        }
         if (!selectedNumber.includes(props.nextNumber) && props.listNumber.includes(props.nextNumber)) {
             const isAutoPick = localStorage.getItem(`AutoPick`);
             if (isAutoPick && isAutoPick === 'true') {
@@ -35,7 +57,7 @@ export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
                 checkBeforeBingo(props.nextNumber);
             }
         }
-    })
+    }, [selectedNumber, props.nextNumber, props.listNumber, checkBeforeBingo, isInit])
 
     return (
         <div className="__app-main playing">
@@ -52,16 +74,40 @@ export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
             <div className="__app-playing-container">
                 <div className="__app-paper-block">
                     {
-                        props.paperIds.reduce((acc: any[], cur) => {
-                            acc.push(generatePaper(cur));
-                            return acc;
-                        }, [])
+                        screenType === 'large' ?
+                            props.paperIds.reduce((acc: any[], cur) => {
+                                acc.push(generatePaper(cur));
+                                return acc;
+                            }, []) : <></>
+                    }
+                    {
+                        screenType === 'small' ?
+                            <Swiper
+                                effect={'cards'}
+                                grabCursor={true}
+                                modules={[EffectCards]}
+                                className="mySwiper"
+                            >
+                                {
+                                    props.paperIds.reduce((acc: any[], cur) => {
+                                        acc.push(<SwiperSlide>{generatePaper(cur)}</SwiperSlide>);
+                                        return acc;
+                                    }, [])
+                                }
+
+                            </Swiper> : <></>
                     }
                 </div>
                 <div className="__app-display-number-block">
                     <div className="__app-previous-number-block">
                         <div className="__app-pre-title">Số trước đó:</div>
-                        <div className="__app-pre-number">{props.preNumber > 0 ? props.preNumber : '-'}</div>
+                        <div className="__app-number-number-cicle">
+                            <div className="__app-pre-number" style={{
+                                color: props.preNumber > 45 ? '#751232' : '#19511f',
+                                borderColor: props.preNumber > 45 ? '#751232' : '#19511f'
+                            }}>{props.preNumber > 0 ? props.preNumber : '-'}</div>
+                        </div>
+
                     </div>
                     <div className="__app-next-number-block">
                         <div className="__app-next-title">Số tiếp theo:</div>
@@ -70,7 +116,13 @@ export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
                                 <div className="__app-generate-loading">
                                     <Spin size="large" />
                                 </div> :
-                                <div className="__app-next-number">{props.nextNumber > 0 ? props.nextNumber : '-'}</div>
+                                <div className="__app-number-number-cicle">
+                                    <div className="__app-next-number" style={{
+                                        color: props.nextNumber > 45 ? '#751232' : '#19511f',
+                                        borderColor: props.nextNumber > 45 ? '#751232' : '#19511f'
+                                    }}>{props.nextNumber > 0 ? props.nextNumber : '-'}</div>
+                                </div>
+
                         }
                     </div>
                     <div className="__app-submit-btn">
@@ -114,7 +166,7 @@ export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
                     </div>
                 </Modal> : <></>
             }
-        </div>
+        </div >
     )
 
     function generatePaper(paperId: string) {
@@ -142,11 +194,11 @@ export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
             const cell = rowData.find(item => (item >= ((i - 1) * 10) && item < (i * 10)) || (i === 9 && item === 90));
             if (cell === undefined) {
                 elements.push(
-                    <div className='__cell-empty' key={`${paperId}_cell_${i}`} style={{ background: PaperColor[paperId] }}></div>
+                    <div className={`__cell-empty${screenType === 'small' ? '_slider' : ''}`} key={`${paperId}_cell_${i}`} style={{ background: PaperColor[paperId] }}></div>
                 )
             } else {
                 elements.push(
-                    <div className={`__cell-data ${selectedNumber.includes(cell) ? ' __cell-selected' : ''}`}
+                    <div className={`__cell-data${screenType === 'small' ? '_slider' : ''}${selectedNumber.includes(cell) ? ' __cell-selected' : ''}`}
                         key={`${paperId}_cell_${i}`}
                         onClick={(e) => {
                             e.preventDefault();
@@ -170,6 +222,7 @@ export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
         return elements;
     }
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     function checkBeforeBingo(cellValue: number) {
         const papersData = props.paperIds.reduce((acc: number[], cur) => {
             const data = PaperData[cur];

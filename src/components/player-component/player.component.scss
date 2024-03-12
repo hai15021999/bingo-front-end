@@ -300,9 +300,40 @@
                                 justify-content: center;
                                 width: 36px;
                                 height: 36px;
+                                min-width: 36px;
+                                min-height: 36px;
                                 cursor: pointer;
                                 background: transparent;
                                 border: 1px solid #000;
+                                color: #000;
+
+                                &.__cell-selected {
+                                    span {
+                                        background-color: #727272;
+                                        padding: 4px;
+                                        border-radius: 4px;
+                                    }
+                                }
+                            }
+
+                            .__cell-empty_slider {
+                                display: flex;
+                                padding: 15px;
+                                border: 1px solid #000;
+                            }
+
+                            .__cell-data_slider {
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                width: 30px;
+                                height: 30px;
+                                min-width: 30px;
+                                min-height: 30px;
+                                cursor: pointer;
+                                background: transparent;
+                                border: 1px solid #000;
+                                color: #000;
 
                                 &.__cell-selected {
                                     span {
@@ -330,16 +361,28 @@
                         align-items: center;
                         color: #fff;
                         font-family: Gluten;
+                        z-index: 10;
 
                         .__app-pre-title {
                             font-size: 20px;
                         }
 
+                        .__app-number-number-cicle {
+                            border-radius: 50%;
+                            background-color: #dbd4b6;
+                            border: 1px solid #dbd4b6;
+                        }
+
                         .__app-pre-number {
-                            font-size: 36px;
+                            font-size: 20px;
                             min-height: 40px;
+                            min-width: 40px;
                             display: flex;
                             align-items: center;
+                            font-family: sans-serif;
+                            justify-content: center;
+                            border: 2px solid;
+                            border-radius: 50%;
                         }
                     }
 
@@ -349,6 +392,7 @@
                         align-items: center;
                         color: #fff;
                         font-family: Gluten;
+                        z-index: 10;
 
                         .__app-next-title {
                             font-size: 34px;
@@ -357,26 +401,37 @@
                             font-weight: 500;
                         }
 
+                        .__app-number-number-cicle {
+                            border-radius: 50%;
+                            background-color: #dbd4b6;
+                            padding: 1px;
+                        }
+
                         .__app-next-number {
-                            font-size: 152px;
+                            font-size: 100px;
                             min-height: 160px;
-                            font-weight: 500;
+                            min-width: 160px;
+                            font-weight: 600;
                             display: flex;
                             align-items: center;
+                            border-radius: 50%;
+                            border: 10px solid;
+                            font-family: sans-serif;
+                            justify-content: center;
                         }
 
                         .__app-generate-loading {
-                            min-height: 160px;
+                            min-height: 180px;
                             display: flex;
                             align-items: center;
 
                             .ant-spin-dot {
                                 font-size: 135px;
-                                
+
                                 .ant-spin-dot-item {
                                     width: 45px !important;
                                     height: 45px !important;
-                                    background-color:rgb(255, 255, 255) !important;
+                                    background-color: rgb(255, 255, 255) !important;
                                 }
                             }
                         }
@@ -406,4 +461,15 @@
             width: calc(100% - 200px);
         }
     }
+}
+
+.swiper {
+    width: 306px;
+    height: 400px;
+}
+
+.swiper-slide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
