@@ -39,7 +39,7 @@ export const PlayingPageComponent: React.FC<IPlayingPageProps> = (props) => {
             <div className="__app-playing-container">
                 <div className="__app-list-number-block">
                     {
-                        props.listNumber.reverse().reduce((acc: any[], cur) => {
+                        props.listNumber.reduce((acc: any[], cur) => {
                             acc.push(
                                 <div className="__app-number-previous" key={cur}>
                                     {cur}
